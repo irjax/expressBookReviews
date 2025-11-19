@@ -1,5 +1,10 @@
 const express = require("express");
-let books = require("./booksdb.js");
+const {
+  getBooks,
+  getBookById,
+  getBookByAuthor,
+  getBookByTitle,
+} = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
@@ -26,60 +31,60 @@ public_users.post("/register", (req, res) => {
 });
 
 // Get the book list available in the shop
-public_users.get("/", function (req, res) {
-  // Send a JSON response containing the books array, formatted with an indentation of 4 spaces for readability
-  return res.send(JSON.stringify({ books }, null, 4));
+public_users.get("/", async (req, res) => {
+  try {
+    const books = await getBooks();
+    res.send(JSON.stringify({ books }, null, 4));
+  } catch (err) {
+    res.status(404).json({ error: err.message });
+  }
 });
 
 // Get book details based on ISBN
-public_users.get("/isbn/:isbn", function (req, res) {
+public_users.get("/isbn/:isbn", async (req, res) => {
   const isbn = req.params.isbn;
-  // Retrieve books object associated with isbn
-  let book = books[isbn];
-  return res.send(JSON.stringify({ book }, null, 4));
+
+  try {
+    // Retrieve books object associated with isbn
+    const book = await getBookById(isbn);
+    if (book) {
+      // Send a JSON response containing the books array, formatted with an indentation of 4 spaces for readability
+      res.send(JSON.stringify({ book }, null, 4));
+    }
+  } catch (err) {
+    res.status(404).json({ error: err.message });
+  }
 });
 
 // Get book details based on author
-public_users.get("/author/:author", function (req, res) {
+public_users.get("/author/:author", async (req, res) => {
   const author = req.params.author;
-  // Retrieve books object associated with author
-  // 1-Obtain all the keys for the ‘books’ object
-  const booksKeys = Object.keys(books);
-  let matchedKey = -1;
-  // 2-Iterate through the ‘books’ array & check the author matches the one provided in the request parameters.
-  for (const key of booksKeys) {
-    if (books[key].author == author) {
-      matchedKey = key;
-      break;
+
+  try {
+    // Retrieve books object associated with author
+    const book = await getBookByAuthor(author);
+    if (book) {
+      // Send a JSON response containing the books array, formatted with an indentation of 4 spaces for readability
+      res.send(JSON.stringify({ book }, null, 4));
     }
-  }
-  if (matchedKey != -1) {
-    const matchedAuthor = books[matchedKey];
-    return res.send(JSON.stringify({ matchedAuthor }, null, 4));
-  } else {
-    return res.send("Author not found");
+  } catch (err) {
+    res.status(404).json({ error: err.message });
   }
 });
 
 // Get all books based on title
-public_users.get("/title/:title", function (req, res) {
+public_users.get("/title/:title", async (req, res) => {
   const title = req.params.title;
-  // Retrieve books object associated with title
-  // 1-Obtain all the keys for the ‘books’ object
-  const booksKeys = Object.keys(books);
-  let matchedKey = -1;
-  // 2-Iterate through the ‘books’ array & check the author matches the one provided in the request parameters.
-  for (const key of booksKeys) {
-    if (books[key].title == title) {
-      matchedKey = key;
-      break;
+
+  try {
+    // Retrieve books object associated with title
+    const book = await getBookByTitle(title);
+    if (book) {
+      // Send a JSON response containing the books array, formatted with an indentation of 4 spaces for readability
+      res.send(JSON.stringify({ book }, null, 4));
     }
-  }
-  if (matchedKey != -1) {
-    const matchedTitle = books[matchedKey];
-    return res.send(JSON.stringify({ matchedTitle }, null, 4));
-  } else {
-    return res.send("Title not found");
+  } catch (err) {
+    res.status(404).json({ error: err.message });
   }
 });
 

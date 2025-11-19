@@ -23,4 +23,68 @@ let books = {
   },
 };
 
-module.exports = books;
+function getBooks() {
+  return new Promise((resolve, reject) => {
+    if (books) {
+      resolve(books);
+    } else {
+      reject(new Error("Books not found"));
+    }
+  });
+}
+
+function getBookById(isbn) {
+  return new Promise((resolve, reject) => {
+    const book = books[isbn];
+    if (book) {
+      resolve(book);
+    } else {
+      reject(new Error("Book not found"));
+    }
+  });
+}
+
+function getBookByAuthor(author) {
+  return new Promise((resolve, reject) => {
+    // 1-Obtain all the keys for the ‘books’ object
+    const booksKeys = Object.keys(books);
+    let matchedKey = -1;
+    // 2-Iterate through the ‘books’ array & check the author matches the one provided in the request parameters.
+    for (const key of booksKeys) {
+      if (books[key].author == author) {
+        matchedKey = key;
+        break;
+      }
+    }
+
+    if (matchedKey != -1) {
+      const matchedAuthor = books[matchedKey];
+      resolve(matchedAuthor);
+    } else {
+      reject(new Error("Author not found"));
+    }
+  });
+}
+
+function getBookByTitle(title) {
+  return new Promise((resolve, reject) => {
+    // 1-Obtain all the keys for the ‘books’ object
+    const booksKeys = Object.keys(books);
+    let matchedKey = -1;
+    // 2-Iterate through the ‘books’ array & check the author matches the one provided in the request parameters.
+    for (const key of booksKeys) {
+      if (books[key].title == title) {
+        matchedKey = key;
+        break;
+      }
+    }
+    if (matchedKey != -1) {
+      const matchedTitle = books[matchedKey];
+      resolve(matchedTitle);
+    } else {
+      reject(new Error("Title not found"));
+    }
+  });
+}
+
+module.exports = { getBooks, getBookById, getBookByAuthor, getBookByTitle };
